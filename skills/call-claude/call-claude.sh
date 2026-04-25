@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 # call-claude: thin wrapper around `claude -p` for use by agents (Codex, Cursor, etc.)
 #
-# Usage (after `npm i -g github:stablyai/call-claude`):
-#   call-claude [--model <alias>] [--effort <level>] "<prompt>"
-#   echo "<prompt>" | call-claude [--model <alias>] [--effort <level>]
+# Installed via: npx skills add stablyai/call-claude
 #
-# Or with zero install:
-#   npx github:stablyai/call-claude [--model <alias>] [--effort <level>] "<prompt>"
-#
-# Defaults:
-#   --model opus
+# Usage:
+#   ./call-claude.sh [--model <alias>] [--effort <level>] "<prompt>"
+#   echo "<prompt>" | ./call-claude.sh [--model <alias>] [--effort <level>]
 #
 # Flags:
 #   --model <alias>   opus | sonnet | haiku | <full-model-id>   (default: opus)
@@ -28,7 +24,7 @@ while [[ $# -gt 0 ]]; do
     --effort)
       EFFORT="$2"; shift 2 ;;
     --help|-h)
-      sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+      sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     --)
       shift; PROMPT="$*"; break ;;
     *)
