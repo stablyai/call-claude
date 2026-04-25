@@ -1,26 +1,42 @@
 # call-claude
 
-Tiny wrapper that lets any agent (Codex, Cursor, another Claude session) delegate a prompt to **Claude** via `claude -p`. Default model: `opus`.
+An agent skill that delegates a prompt to **Claude** via `claude -p`. Works with Claude Code, Codex, Cursor, and every other agent supported by [skills.sh](https://skills.sh).
 
-## Install & use in one command
+## Install
 
 ```bash
-npx github:stablyai/call-claude "explain what this repo does"
+npx skills add stablyai/call-claude
 ```
 
-That's it. No clone, no PATH, no chmod.
+That's it. The [skills CLI](https://github.com/vercel-labs/skills) handles picking an agent (Claude Code, Codex, Cursor, etc.) and dropping the skill into the right place.
 
-### With flags
+### Target a specific agent
 
 ```bash
-npx github:stablyai/call-claude --model sonnet "summarize the README"
-npx github:stablyai/call-claude --model opus --effort high "design a caching layer"
+npx skills add stablyai/call-claude -a claude-code
+npx skills add stablyai/call-claude -a codex
+npx skills add stablyai/call-claude -a cursor
 ```
 
-### Multi-line prompt via stdin
+### Install globally (available across all projects)
 
 ```bash
-cat prompt.md | npx github:stablyai/call-claude
+npx skills add stablyai/call-claude -g
+```
+
+## Use
+
+Once installed, invoke the skill from inside your agent (e.g. in Claude Code):
+
+```
+/call-claude explain what this repo does
+```
+
+With flags:
+
+```
+/call-claude --model sonnet summarize the README
+/call-claude --model opus --effort high design a caching layer
 ```
 
 ## Flags
@@ -34,17 +50,11 @@ cat prompt.md | npx github:stablyai/call-claude
 
 [Claude Code](https://claude.com/claude-code) must be installed — verify with `claude --version`.
 
-## Using from an agent
+## Repo layout
 
-Point the agent at [`SKILL.md`](./SKILL.md) and it'll know how to call `npx github:stablyai/call-claude ...`.
-
----
-
-## Prefer a local alias?
-
-If you're going to use it a lot, skip `npx` and just:
-
-```bash
-npm i -g github:stablyai/call-claude
-call-claude "your prompt"
+```
+skills/
+  call-claude/
+    SKILL.md         # tells the agent how/when to invoke this skill
+    call-claude.sh   # the wrapper the skill calls out to
 ```
