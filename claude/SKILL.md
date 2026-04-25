@@ -1,72 +1,65 @@
 ---
 name: claude
-description: Run an arbitrary prompt through Claude CLI (`claude -p`) and return the results. Use when the user asks to delegate a task to claude, run something with `claude -p`, or invoke the /claude skill with a prompt.
+description: Delegate a prompt to Claude via `claude -p`. For use by agents (Codex, Cursor, etc.) that want to hand off a task to Claude and get the result back. Default model is opus.
 ---
 
 # claude
 
-Run an arbitrary prompt through the **Claude CLI** (`claude -p`) and return the results.
+Delegate an arbitrary prompt to **Claude** via `claude -p` and return the output.
+
+Useful when an agent (Codex, Cursor, another Claude session, etc.) wants a second opinion, a parallel implementation, or to offload a chunk of work to Claude.
 
 ---
 
-## Arguments
-
-**Required**: The user must provide a prompt after `/claude`.
-
-**Optional flags** (parsed from the user's message — NOT passed as CLI flags by the user):
-- `--model <alias>` — override model (default: `opus`). Examples: `opus`, `sonnet`, `haiku`, or a full model ID.
-- `--effort <level>` — reasoning effort. One of: `low`, `medium`, `high`, `xhigh`, `max`.
-
-If the user does not specify these, use `--model opus` and omit `--effort`.
-
----
-
-## Process
-
-### 1. Parse the user's message
-
-Extract:
-- The prompt (everything that isn't a recognized flag)
-- Optional `--model <value>`
-- Optional `--effort <value>`
-
-### 2. Run `claude -p`
-
-Execute from the current working directory:
+## Usage
 
 ```bash
-claude -p --model <MODEL> [--effort <EFFORT>] "<PROMPT>"
+claude-skill [--model <alias>] [--effort <level>] "<prompt>"
 ```
 
-- Always pass `--model` (default `opus`).
-- Only pass `--effort` if the user specified one.
-- Quote the prompt properly. For multi-line prompts, pipe via stdin instead:
-  ```bash
-  echo "<PROMPT>" | claude -p --model <MODEL>
-  ```
+Or pipe the prompt via stdin (preferred for multi-line):
 
-### 3. Present the results
+```bash
+echo "<prompt>" | claude-skill [--model <alias>] [--effort <level>]
+```
 
-Show the full output to the user. Do not summarize unless asked.
+### Flags
+
+| Flag | Values | Default |
+|------|--------|---------|
+| `--model` | `opus`, `sonnet`, `haiku`, or a full model ID | `opus` |
+| `--effort` | `low`, `medium`, `high`, `xhigh`, `max` | _(omitted)_ |
+
+---
+
+## Process (for the calling agent)
+
+1. **Parse** the user's request — extract the prompt and any `--model` / `--effort` overrides.
+2. **Invoke** `claude-skill` with those flags and the prompt.
+3. **Return** Claude's full output to the user. Don't summarize unless asked.
+
+`claude -p` is non-interactive and prints the final answer to stdout, so the wrapper output can be captured directly.
 
 ---
 
 ## Examples
 
-### Default (opus, no effort override)
+Default (opus):
+```bash
+claude-skill "explain what this repo does"
 ```
-/claude explain what this repo does
-```
-→ `claude -p --model opus "explain what this repo does"`
 
-### Override model
+Override model:
+```bash
+claude-skill --model sonnet "summarize the README"
 ```
-/claude --model sonnet summarize the README
-```
-→ `claude -p --model sonnet "summarize the README"`
 
-### Override model and effort
+Override model + effort:
+```bash
+claude-skill --model opus --effort high "design a caching layer for this service"
 ```
-/claude --model opus --effort high design a caching layer for this service
+
+Multi-line prompt via stdin:
+```bash
+cat prompt.md | claude-skill --model opus
 ```
-→ `claude -p --model opus --effort high "design a caching layer for this service"`
